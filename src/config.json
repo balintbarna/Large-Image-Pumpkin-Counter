@@ -1,0 +1,27 @@
+{
+	"img_filename": "../input/DJI_0240.JPG", 
+	"bgr_properties": 
+	{
+		"b_mean": 41, 
+		"g_mean": 103, 
+		"r_mean": 157, 
+		"b_stdev": 19, 
+		"g_stdev": 45, 
+		"r_stdev": 45,
+		"lowerb_stdev_scalar": 1,
+		"upperb_stdev_scalar": 2
+	}, 
+	"lab_properties": 
+	{
+		"l_mean": 120, 
+		"a_mean": 149, 
+		"b_mean": 171,
+		"l_stdev": 33.5,
+		"a_stdev": 7.1,
+		"b_stdev": 11.6,
+		"lowerb_stdev_scalar": 1,
+		"upperb_stdev_scalar": 2
+	},
+	"pumpkin_diameter": 20,
+	"filter_ksize": 5
+}
