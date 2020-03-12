@@ -21,5 +21,9 @@ Pipfile*
 *.fdb_latexmk
 *.xdv
 
+# Source images
+*2020-03-12 Images for second miniproject
+
+# Exceptions
 !2020-03-12-Photogrammetry-Miniproject.pdf
 
