@@ -21,3 +21,5 @@ Pipfile*
 *.fdb_latexmk
 *.xdv
 
+!2020-03-12-Photogrammetry-Miniproject.pdf
+
