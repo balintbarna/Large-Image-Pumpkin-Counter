@@ -6,6 +6,15 @@
     
     Author:     frnyb
     Date:       20202102
+
+    Change log: frnyb   20200312    Modified PumpkinCounter
+                                    class to be able to take 
+                                    an image as argument in 
+                                    constructor.
+                                    Added method in PumpkinCounter
+                                    class that returns coordinates of
+                                    pumpkin contours that touches
+                                    the border of the image.
 """
 
 ###############################################################
@@ -28,12 +37,15 @@ from config_loader import load_config
 class PumpkinCounter():
     def __init__(
         self,
+        img=None,
         img_path=None,
         silent=False
     ):
         self.config = load_config()
 
-        if (img_path != None):
+        if img is not None:
+            self.img = img
+        elif (img_path is not None):
             self.img = cv2.imread(img_path)
         else:
             self.img = cv2.imread(self.config['img_filename'])
@@ -154,6 +166,22 @@ class PumpkinCounter():
             )
 
         return n_pumpkins_estimate
+    
+    def get_bordering_pumpkins_coordinates(self):
+        bordering_coordinates = []
+        
+        max_x = self.img.shape[0] - 1
+        max_y = self.img.shape[1] - 1
+
+        for cnt in self.counted_pumpkins_fast:
+            dist_to_border_x = min([cnt.center[0], max_x - cnt.center[0]])
+            dist_to_border_y = min([cnt.center[1], max_y - cnt.center[1]])
+
+            if (dist_to_border_x <= self.config['pumpkin_diameter'] or 
+                    dist_to_border_y <= self.config['pumpkin_diameter']):
+                bordering_coordinates.append(cnt.center)
+                
+        return bordering_coordinates
 
     def _segment_bgr(
         self,
@@ -204,7 +232,7 @@ class PumpkinCounter():
         self,
         filtered_img
     ):
-        _, cv2_cnts, _ = cv2.findContours(
+        cv2_cnts, _ = cv2.findContours(
             filtered_img, 
             cv2.RETR_TREE, 
             cv2.CHAIN_APPROX_SIMPLE
@@ -347,7 +375,7 @@ if __name__ == "__main__":
 
     if args.i != None:
         pc = PumpkinCounter(
-        args.i,
+        img_path=args.i,
         silent=args.s
         )
     else:
@@ -375,5 +403,3 @@ if __name__ == "__main__":
             n_pumpkins = pc.count_pumpkins_fast()
 
     print(n_pumpkins)
-
-    

@@ -1,5 +1,5 @@
 {
-	"img_filename": "../input/DJI_0240.JPG", 
+	"orthomosaic_filename": "../images/jpg_cut/img.jpg", 
 	"bgr_properties": 
 	{
 		"b_mean": 41, 
@@ -8,7 +8,7 @@
 		"b_stdev": 19, 
 		"g_stdev": 45, 
 		"r_stdev": 45,
-		"lowerb_stdev_scalar": 1,
+		"lowerb_stdev_scalar": 0.5,
 		"upperb_stdev_scalar": 2
 	}, 
 	"lab_properties": 
@@ -23,5 +23,7 @@
 		"upperb_stdev_scalar": 2
 	},
 	"pumpkin_diameter": 20,
-	"filter_ksize": 5
+	"filter_ksize": 5,
+	"tile_height": 2000,
+	"tile_width": 2000
 }
