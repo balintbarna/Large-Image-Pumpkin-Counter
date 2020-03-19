@@ -1,5 +1,213 @@
 \documentclass[../Head/Main.tex]{subfiles}
 \begin{document}
-\section{Introduction}
+\section{Counting Pumpkins}
+For counting the pumpkins in one tile, the code from the previous project was utilized, specifically the \textit{simple} method executed with a call to the method \textit{count\_pumpkins\_fast(...)}. This code is contained in the file \url{src/pumpkin\_counter\_single\_img.py}. To summarize, the method works as follows:
+\begin{enumerate}
+\item The image is segmented by a range of RGB values
+\item The segmented image is filtered
+\item Contours are found in the filtered image
+\item Overlapping contours are removed using an approximate pumpkin diameter
+\item The remaining contours are counted
+\end{enumerate}
+This process would then have to be run for each tile of the orthomosaic and a procedure should finally handle potentially overlapping contours in between the tiles. The remaining code referenced in this section can be found in the file \url{src/pumpkin\_counter\_orthomosaic.py}.
+
+\subsection{The PumpkinCounterOrthomosaic Class}
+A class \textit{PumpkinCounterOrthomosaic} is implemented to perform the counting of pumpkins an orthomosaic.\\
+After initialization of the \textit{PumpkinCounterOrthomosaic} object, a call to the method \textit{count\_pumpkins(...)} will perform the full pumpkin counting procedure. The overall procedure follows this form:
+\begin{enumerate}
+\item Instantiate \textit{ImageDivisor} object, section \ref{sec:imageHandling}, and list \textit{counted\_pumpkins\_data}
+\item For each tile in the \textit{ImageDivisor} object:
+\begin{enumerate}
+\item Save the results of calling \textit{\_count\_pumpkins\_tile(...)} by appending to list \textit{counted\_pumpkins\_data}:
+\begin{verbatim}
+    self.counted_pumpkins_data.append(
+        self._count_pumpkins_tile(
+            tile,
+            index,
+            img_filename
+        )
+    )
+\end{verbatim}
+\end{enumerate}
+\item Sort the results saved for each tile by calling \textit{\_sort\_counted\_pumpkins\_data(...)}:
+\begin{verbatim}
+    self.counted_pumpkins_data, total_count = self._sort_counted_pumpkins_data(
+            self.counted_pumpkins_data,
+            div
+        )
+\end{verbatim}
+\end{enumerate}
+The two mentioned methods are explained below.
+
+\subsubsection{Counting Pumpkins in One Tile}
+The counting of pumpkins in one tile utilizes as mentioned the \textit{PumpkinCounter} class found in \url{src/pumpkin\_counter\_single\_img.py}. The result is saved in a dictionary with key \textit{'count'} along with the tile index under dictionary key \textit{'index'} and a list of bordering coordinates under dictionary key \textit{'bordering\_coordinates'}. The bordering coordinates includes the center coordinates of all found pumpkins in the tile that are closer to an edge in the tile than one approximate pumpkin diameter. These will be used later for sorting redundantly counted pumpkins.\\
+This is done in the \textit{\_count\_pumpkins\_tile(...)} method. The resulting dictionary is returned.
+
+\subsubsection{Sorting the Counted Pumpkins}
+With the list of dictionaries contained the counted pumpkins data for each tile as explained above, the potentially overlapping counted pumpkins should be sorted. This is done in the method \textit{\_sort\_counted\_pumpkins\_data(...)}. The algorithm is explained below. The list of the mentioned dictionaries are contained in the variable \textit{counted\_pumpkins\_data}:
+\begin{enumerate}
+\item The method definition is as follows:
+\begin{verbatim}
+    def _sort_counted_pumpkins_data(
+            self,
+            counted_pumpkins_data,
+            divisor
+    ):
+\end{verbatim}
+The parameter \textit{counted\_pumpkins\_data} is the list of dictionaries containing the counting results for each tile and \textit{divisor} is the \textit{ImageDivisor} object, section \ref{sec:imageHandling}.
+\item For each dictionary in the list of dictionaries, the method iterates through the remaining dictionaries in the list of dictionaries in order to consider every pair of dictionaries once:
+\begin{verbatim}
+    for i, pmk_data_i in enumerate(counted_pumpkins_data):
+        for j, pmk_data_j in enumerate(
+            counted_pumpkins_data,
+            i + 1
+        ):
+\end{verbatim}
+\begin{enumerate}
+\item Determine if the two considered tiles are bordering in the orthomosaic and in which direction they border (n, s, e, w from tile \textit{i} to tile \textit{j}):
+\begin{verbatim}
+    is_bordering, direction = self._is_bordering(
+        pmk_data_i,
+        pmk_data_j,
+        divisor
+    )
+\end{verbatim}
+The method \textit{\_is\_bordering(...)} simply determines if the tiles are bordering based on the methods of the \textit{ImageDivisor} object \textit{divisor}, section \ref{sec:imageHandling}, and the index of the tiles stored in their respective dictionaries \textit{pmk\_data\_*} under key \textit{'index'} as explained above.
+\item If the tiles are bordering, reduce the number of counted pumpkins in the two dictionaries:
+\begin{verbatim}
+    if is_bordering:
+        counted_pumpkins_data[i], counted_pumpkins_data[j] = self._reduce_counted_pumpkins(
+            counted_pumpkins_data[i],
+            counted_pumpkins_data[j],
+            direction,
+            divisor
+         )
+\end{verbatim}
+The method \textit{\_reduce\_counted\_pumpkins(...)} reduce the counted pumpkins based on the proximity criterion explained above and updates the given tile dictionaries. The method is described in greater detail below.
+\end{enumerate}
+\item Sum up the count for each tile and return the result:
+\begin{verbatim}
+    total_count = 0
+    for pmk in counted_pumpkins_data:
+        total_count += pmk['count']
+    
+    return counted_pumpkins_data, total_count
+\end{verbatim}
+\end{enumerate}
+The actual reduction of the pumpkins potentially counted double in two bordering tiles is performed in the method \textit{\_reduce\_counted\_pumpkins(...)}. The method progresses as follows:
+\begin{enumerate}
+\item The method definition is
+\begin{verbatim}
+    def _reduce_counted_pumpkins(
+        self,
+        cnt_pmk_data_i,
+        cnt_pmk_data_j,
+        direction,
+        divisor
+    ):
+\end{verbatim}
+The parameters \textit{cnt\_pmk\_data\_*} are the result dictionaries for the tiles \textit{i} and \textit{j}, \textit{direction} is the direction in which the tiles are bordering, and \textit{divisor} is the \textit{ImageDivisor} object.
+\item Instantiation of lists to hold the remaining non overlapping boundary coordinates of the pumpkins are instantiated:
+\begin{verbatim}
+    bordering_coords_i = []
+    bordering_coords_j = cnt_pmk_data_j['bordering_coordinates']
+\end{verbatim}
+\item For each coordinate in tile \textit{i} bordering coordinates:
+\begin{verbatim}
+for i, coord_i in enumerate(cnt_pmk_data_i['bordering_coordinates']):
+\end{verbatim}
+\begin{enumerate}
+\item Instantiate variable \textit{index\_to\_remove} and loop through tile \textit{j} bordering coordinates:
+\begin{verbatim}
+    index_to_remove = None              # None for no duplicate, -1 for removing from list i, 
+                                        # otherwise remove index from list j
+    for j, coord_j in enumerate(
+        bordering_coords_j,
+        i + 1
+    ):
+\end{verbatim}
+\begin{enumerate}
+\item Calculate distance between coordinates across the tiles:
+\begin{verbatim}
+    dist = self._cross_tile_distance(
+        cnt_pmk_data_i['index'],
+        cnt_pmk_data_j['index'],
+        coord_i,
+        coord_j,
+        direction,
+        divisor
+    )
+\end{verbatim}
+The method \textit{\_cross\_tile\_distance(...)} calculates the distance in pixels between two points in two bordering tiles given the tile indices, the coordinates of the two points in reference to the respective tile, the direction the tiles are bordering, and the \textit{ImageDivisor} object for obtaining the slices if the tiles in reference to the original orthomosaic.
+\item If the distance between the points are less than a pumpkin diameter:
+\begin{verbatim}
+    if dist < self.config['pumpkin_diameter']:
+\end{verbatim}
+\begin{enumerate}
+\item Calculate the distance from the point to the respective border for both points:
+\begin{verbatim}
+    dist_to_border_i, dist_to_border_j = self._dist_to_border(
+        cnt_pmk_data_i['index'],
+        cnt_pmk_data_j['index'],
+        coord_i,
+        coord_j,
+        direction,
+        divisor
+    )
+\end{verbatim}
+The method \textit{\_dist\_to\_border} simply calculates the distance to the respectful border for each of the points \textit{i} and \textit{j}.
+\item Determine what index to remove:
+\begin{verbatim}
+    if dist_to_border_i > dist_to_border_j:
+        index_to_remove = j
+    else:
+        index_to_remove = -1
+\end{verbatim}
+Note here, that a positive value for \textit{index\_to\_remove} will indicate removal of the point from tile \textit{j}, a value of -1 will indicate removal of the current point of til \textit{i}, and a value of \textit{None}, which would have been the case if the points were not within one pumpkin diameter, would indicate not to remove any of the two points in consideration.
+\end{enumerate}
+\end{enumerate}
+\item In the end of an iteration in the outer loop, the correct removal of a point is conducted:
+\begin{verbatim}
+    if index_to_remove == -1:
+        continue
+
+    if index_to_remove != None:
+        bordering_coords_j.pop(index_to_remove)
+
+    bordering_coords_i.append(coord_i)
+\end{verbatim}
+\end{enumerate}
+\item Finally, the dictionary for each tile is updated with the resulting pumpkin count:
+\begin{verbatim}
+    cnt_pmk_data_i['count'] = cnt_pmk_data_i['count'] - (len(cnt_pmk_data_i['bordering_coordinates']) - len(bordering_coords_i))
+
+    cnt_pmk_data_i['bordering_coordinates'] = bordering_coords_i;
+
+    cnt_pmk_data_j['count'] = cnt_pmk_data_j['count'] - (len(cnt_pmk_data_j['bordering_coordinates']) - len(bordering_coords_j))
+
+    cnt_pmk_data_j['bordering_coordinates'] = bordering_coords_j
+
+    return cnt_pmk_data_i, cnt_pmk_data_j
+\end{verbatim}
+\end{enumerate}
+Thus, duplicate pumpkins will be removed in the tile where the pumpkin center is closest to the border and remained in the tile where the pumpkin center is furthest from the border.
+
+\subsection{Running the Program}
+The script \url{src/pumpkin\_counter\_orthomosaic.py} is made to be command line compatible. Assuming the correct Python environment is installed, the program can be used from the command line following the following prototype (executed fromt he \url{src} folder):
+\begin{verbatim}
+    usage: pumpkin_counter_ortomosaic.py [-h] [-i I] [-o O] [-t T] [-s]
+
+    Count pumpkins in an orthomosaic.
+
+    optional arguments:
+      -h, --help  show this help message and exit
+      -i I        The input orthomosaic path. If non given, a default path will be
+                  used.
+      -o O        Marked images output directory. If specified, will save tiles
+                  with marked pumpkins in the specified directory.
+      -t T        Tile output directory. If specified, will store ouput tiles
+                  without marked pumpkins here.
+      -s          If specified, no progress bar will be shown.
+\end{verbatim}
 
 \end{document}
