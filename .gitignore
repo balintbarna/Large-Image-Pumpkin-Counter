@@ -1,9 +1,9 @@
 # Python code
 .vscode/
-output/
 __pycache__/
 Pipfile*
 .*
+images/
 
 # LaTeX
 *-blx.bib
@@ -21,6 +21,7 @@ Pipfile*
 *.fdb_latexmk
 *.xdv
 *.synctex*
+*.png
 
 # Source images
 *2019-03-19 Images for third miniproject
