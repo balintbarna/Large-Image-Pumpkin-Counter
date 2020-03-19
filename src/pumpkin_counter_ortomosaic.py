@@ -50,7 +50,8 @@ class PumpkinCounterOrthomosaic:
 
     def count_pumpkins(
             self,
-            marked_images_directory=None
+            marked_images_dir=None,
+            tiles_dir=None
     ):
         if not self.silent:
             print('Dividing orthomosaic into tiles.')
@@ -72,15 +73,24 @@ class PumpkinCounterOrthomosaic:
                 disable=self.silent
         ):
             img_filename = None
-            if marked_images_directory != None:
-                img_filename = marked_images_directory + "marked_pumpkins_" + str(index) + ".png"
-            self.counted_pumpkins_data.append(self._count_pumpkins_tile(
-                tile,
-                index,
-                img_filename
+            if marked_images_dir != None:
+                img_filename = output_img_dir + "marked_pumpkins_" + str(index) + ".png"
+                
+            tile_filename = None
+            if tiles_dir != None:
+                tile_filename = tiles_dir + "tile_" + str(index) + ".png"
+                cv2.imwrite(
+                        tile_filename,
+                        tile
+                )
+
+            self.counted_pumpkins_data.append(
+                self._count_pumpkins_tile(
+                    tile,
+                    index,
+                    img_filename
                 )
             )
-            
     
         div.free_image()
 
@@ -174,7 +184,7 @@ class PumpkinCounterOrthomosaic:
         bordering_coords_j = cnt_pmk_data_j['bordering_coordinates']
 
         for i, coord_i in enumerate(cnt_pmk_data_i['bordering_coordinates']):
-            index_to_remove = None              # None for no duplicates, -1 for removing from list i, 
+            index_to_remove = None              # None for no duplicate, -1 for removing from list i, 
                                                 # otherwise remove index from list j
             for j, coord_j in enumerate(
                     bordering_coords_j,
@@ -305,6 +315,13 @@ if __name__ == '__main__':
         help="Marked images output directory. If specified, will save tiles with marked pumpkins in the specified directory."
     )
     parser.add_argument(
+        '-t',
+        dest='t',
+        action='store',
+        type=str,
+        help='Tile output directory. If specified, will store ouput tiles without marked pumpkins here.'
+    )
+    parser.add_argument(
         '-s',
         dest='s',
         action='store_true',
@@ -314,23 +331,16 @@ if __name__ == '__main__':
 
     args = parser.parse_args(sys.argv[1:])
 
-    pc = None
+    pc = PumpkinCounterOrthomosaic(
+            orthomosaic_path=args.i,
+            silent=args.s
+    )
 
-    if args.i != None:
-        pc = PumpkinCounterOrthomosaic(
-                orthomosaic_path=args.i,
-                silent=args.s
-        )
-    else:
-        pc = PumpkinCounterOrthomosaic(silent=args.s)
-
-    n_pumpkins = 0
-
-    if args.o != None:
-        n_pumpkins = pc.count_pumpkins(marked_images_directory=args.o)
-    else:
-        n_pumpkins = pc.count_pumpkins()
-
+    n_pumpkins = pc.count_pumpkins(
+            marked_images_dir=args.o,
+            tiles_dir=args.t
+    )
+    
     if pc.silent:
         print(n_pumpkins)
     else:
