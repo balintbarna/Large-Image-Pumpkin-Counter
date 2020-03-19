@@ -1,6 +1,104 @@
 \documentclass[../Head/Main.tex]{subfiles}
 \begin{document}
 \section{Large Image Handling}\label{sec:imageHandling}
+For handling the orthmosaic, a handling procedure for large images must be designed. This was done as a generic Python module. All code mentioned in this section can be found in the file \url{src/image_divisor.py}.
+
+\subsection{The \textit{ImageDivisor} Class}
+A class is implemented to handle the image division into tiles. The constructor takes an image filename as well as values for the desired tile width and height. The division into tiles is then computed. The then class exposes accesibility methods for the tiles.
+
+\subsubsection{Division into Tiles}
+The approach for finding a suitable division of the orthomosaic into tiles is finding on finding the best fitting tile width and height close to the given desired values. The algorithm for obtaining the appropriate x-length division is as follows:
+\begin{enumerate}
+\item Variables are initiated for holding the best x-division length and the lowest division remainder:
+\begin{verbatim}
+	best_x = x_desired
+    lowest_remainder_x = inf
+\end{verbatim}
+\item For each value of x-division length from half the desired value to double the desired value.
+\begin{verbatim}
+    for x in range(int(x_desired * 0.5), int(x_desired * 2)):
+\end{verbatim}
+\begin{enumerate}
+\item If the division is larger than the x-length of the images, break:
+\begin{verbatim}
+    if self.img_shape[0] / x < 1:
+        break
+\end{verbatim}
+\item If remainder of division is less than the current lowest remainder, update best current division:
+\begin{verbatim}
+    remainder = (self.img_shape[0] / x) - int(self.img_shape[0] / x)
+    if remainder < lowest_remainder_x:
+        lowest_remainder_x = remainder
+        best_x = x
+\end{verbatim}
+\end{enumerate}
+\end{enumerate}
+For obtaining the division in the y-length, the exact same approach was utilized. As mentioned, the division is found in the constructor of the class. The divisions are then saved as object variables.
+
+\subsubsection{Accessibility of the Tiles}
+The accessibility of the tiles was implemented as a Python iterator. This was done because the usage of the tiles would be iterative as the pumpkins would have to be calculated for each tile.\par
+Several helping functions were implemented for this purpose. These are mentioned below:
+\begin{itemize}
+\item A function \textit{n\_tiles()} that returns the total number of tiles in x and y direction of the image. The number of tiles in each direction is determined such that the last tile will be shorter than the remaining tiles in the respectfull direction by the minimum remainder of division found in the image division procedure explained above.
+\item A function \textit{index\_to\_slice(index)} that given an index returns the start and end x and y values to be used with \textit{numpy} slicing of the image to obtain the respective tiles:
+\begin{enumerate}
+\item The number of tiles in the x and y direction is obtained and the index is tested for being out of range:
+\begin{verbatim}
+    n_tiles_x, n_tiles_y = self.n_tiles()
+
+    if (n_tiles_x * n_tiles_y <= index):
+        raise IndexError("Tile index out of range")
+\end{verbatim}
+\item The x start and end values are found:
+\begin{verbatim}
+    x_start = (index % n_tiles_x) * self.x
+    x_end = x_start + self.x
+    if (index % n_tiles_x) == n_tiles_x - 1:
+    	x_end = self.img_shape[0]
+\end{verbatim}
+Note that if the index yields the last tile in the x direction of the image, the x end value will simply be the length of the image in the x direction.
+\item The y start and end values are found in a similar manner:
+\begin{verbatim}
+    y_start = int(index / n_tiles_x) * self.y
+    y_end = y_start + self.y
+    if int(index / n_tiles_y) == n_tiles_y - 1:
+        y_end = self.img_shape[1]
+
+\end{verbatim}
+\end{enumerate}
+\item The function \textit{length()} return the total number of tiles.
+\end{itemize}
+For implementing the Python iterator, three methods were overloaded:
+\begin{itemize}
+\item The method \textit{\_\_getitem\_\_(index)} that gets called when accessing the object by index
+\item The method \textit{\_\_iter\_\_()} that gets called when starting an iterator. This method solely initialises an object variable \textit{iter\_index} to 0
+\item The method \textit{\_\_next\_\_()} that gets called for each iteration to receive the respective iteration object
+\end{itemize}
+At this point, two approaches were considered for obtainment and storage of the image and tiles. This happens in the \textit{\_\_getitem\_\_(index)} method.\\
+The first approach was to load the entire orthomosaic using OpenCV's \textit{imread(...)} method during construction of the ImageDivisor object and from \textit{\_\_getitem\_\_(index)} return the \textit{numpy} slices of the image as given by the \textit{index\_to\_slice(index)} method explained above. The second approach was to use the slices obtained from \textit{index\_to\_slice(index)} for loading only the respective part of the orthomosaic using \textit{rasterior}. The first approach executed faster than the second approach at the cost of memory, as for the first approach, the entire orthomosaic is stored in RAM whereas for the second approach, only one tile would be stored in RAM at a time. As mentioned in section \ref{sec:photo}, the orthomosaic used for this purpose has been cropped and is thus not severely large, however for a general use case the orthomosaic could potentially be much larger. It was therefore decided to use the second approach and thus only having one tile stored in RAM at a time.\\
+The implementation of \textit{\_\_next\_\_()} then checks if the variable \textit{iter\_index} is below the total number of tiles, then increments and returns the appropriate tile:
+\begin{verbatim}
+    if (self.iter_index < self.length()):
+        tile = self[self.iter_index]
+        self.iter_index += 1
+        return tile
+    else:
+        raise StopIteration
+\end{verbatim}
+All tiles in the orthomosaic can then be accessed iteratively:
+\begin{verbatim}
+    div = ImageDivisor(img_filename)
+    for tile in div:
+        cv2.imshow(
+            "tile",
+            tile
+        )
+\end{verbatim}
+Or by indexing:
+\begin{verbatim}
+div = ImageDivisor(img_filename)
+first_tile = div[0]
+\end{verbatim}
 
 
 \end{document}
