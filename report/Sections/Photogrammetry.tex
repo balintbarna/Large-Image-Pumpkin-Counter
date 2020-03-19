@@ -1,6 +1,6 @@
 \documentclass[../Head/Main.tex]{subfiles}
 \begin{document}
-\section{Photogrammetry}
+\section{Photogrammetry}\label{sec:photo}
 In this section, our goal is to take the partially overlapping images we got from the drone, and stitch them together.
 We aim to get a large, high definition image, that looks like it was taken from a higher altitude, 
 capturing a larger land area than any single original image from the set.
@@ -20,16 +20,22 @@ Both options took around a few seconds and there was no noticable difference in 
 The digital elevation model is a 3D representation of a surface.
 This can be computed by finding point pairs for each pixel and calculating from the disparity.
 Not all pixels have pairs, in which case it can be estimated based on its neighbourhood.
-For this computation, we left the default parameters suggested by the program unchanged.
+For this computation, we left the parameters suggested by the program unchanged.
 
 \subsection{Orthomosaic}
+We tried different sources for the orthomosaic, in the end we chose to use the DEM.
+For the final version, we left the parameters suggested by the program unchanged, except for the boundaries.
+Since we only needed the field in the middle, we cut off the rest of the image through some trial and error.
+The GSD resolution is 0.0235629 meters per pixel.
 
+The largest file generated when exporting the orthomosaic was a 4 GB PNG, covering the whole image. 
+The smallest file size we achieved, while still retaining good visual properties, was achieved with a 127 MB JPG with the unused parts cut off.
 
 IN THIS SECTION SHOULD BE INCLUDED:
 \begin{itemize}
-\item Bundle adjustment
-\item Digitial elevation model
-\item Orthorectification and orthomosaic creation
+\item Bundle adjustment - check ✅✔
+\item Digitial elevation model - check
+\item Orthorectification and orthomosaic creation - check
 \item EXIF data
 \item Number of images and approximate overlap
 \item Size of orthomosaic (resolution and disk size)
