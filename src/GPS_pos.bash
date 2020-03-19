@@ -8,5 +8,8 @@ do
 	#exiftool "-DateTimeOriginal" $x
 	exiftool "-GPSPosition" $x >> ../output/gps_pos.txt
 	#exiftool "-GPSAltitude" $x
+	#exiftool "-ExposureTime" $x
+	#exiftool "-FNumber" $x
+	exiftool "-ISO" $x >> ../output/iso.txt
 done
 python3 ../src/makekml.py
