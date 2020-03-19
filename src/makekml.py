@@ -196,6 +196,17 @@ if __name__ == "__main__":
       data.append([latitude,longitude])
 
   data = np.asarray(data)
+
+  minElement = np.argmin(data,0)
+  maxElement = np.argmax(data,0)
+  print(minElement)
+  print(maxElement)
+
+  print(data[minElement[0],0],data[minElement[1],1])
+  print(data[maxElement[0],0],data[minElement[1],1])
+  print(data[maxElement[0],0],data[maxElement[1],1])
+  print(data[minElement[0],0],data[maxElement[1],1])
+
   kml.begin('../output/flight_path.kml', 'Example', 'Example on the use of kmlclass', 0.7)
   kml.trksegbegin ('', '', 'red', 'absolute') 
   kml.getPoints(data[:,0],data[:,1])
