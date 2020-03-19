@@ -1,12 +1,36 @@
 \documentclass[../Head/Main.tex]{subfiles}
 \begin{document}
 \section{Photogrammetry}\label{sec:photo}
-In this section, our goal is to take the partially overlapping images we got from the drone, and stitch them together.
-We aim to get a large, high definition image, that looks like it was taken from a higher altitude, 
-capturing a larger land area than any single original image from the set.
+In this section, the goal was to take the partially overlapping images taken by the drone, and stitch them together.\\
+The aim is to get a large, high definition image, that looks like it was taken from a higher altitude, 
+capturing a larger land area than any single original image from the set.\\
+To create the orthomosaic, Agisoft Metashape Pro was chosen. 
+Different quality settings where tried and results compared.
 
-To create the orthomosaic, we chose Agisoft Metashape Pro. 
-We tried different quality settings and compared the results.
+\subsection{EXIF data}
+The images was taken 19\textsuperscript{th} of september 2017 from 10:01 AM to 10:41 AM. The footage was taken at Gyldensteen Gods at Gyldensteensvej 101, 5400 Bogense in an area contained by these four coordinates.
+\begin{itemize}
+\item[-] 55°33'59.99"N, 10°08'59.72"E \vspace{-7pt}
+\item[-] 55°34'10.37"N, 10°08'59.72"E \vspace{-7pt}
+\item[-] 55°34'10.37"N, 10°09'33.60"E \vspace{-7pt}
+\item[-] 55°33'59.99"N, 10°09'33.60"E
+\end{itemize}
+
+The camera used was a senseFly S.O.D.A. with an image resolution of 5472 z 3648 pixels and a focal length of 10.2 mm/28 mm (35 mm equivalent). The type of UAV was not specified by the EXIF informations but it was either a senseFly eBee X or eBee Classic.\\
+The images was taken on exposure priority with an exposure time of 1/1000 s and wide aperture of 2.8. The ISO-setting fluctuated from 200 to 800. The camera was set to auto white balance.
+
+%Pitch                           : 6.029021
+%Roll                            : -7.621159
+%Yaw                             : 316.127563
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.75\textwidth]{../Figures/Flight_path}
+	\caption{Illustration of the image path}
+	\label{fig:flight_path}
+	\vspace{-15pt}
+\end{figure}
+In figure \ref{fig:flight_path} the positions of the images taken can be seen. This is not the flight path of the drone, but the positions where the images where taken.
 
 \subsection{Alignment}
 
@@ -31,64 +55,9 @@ The GSD resolution is 0.0235629 meters per pixel.
 The largest file generated when exporting the orthomosaic was a 4 GB PNG, covering the whole image. 
 The smallest file size we achieved, while still retaining good visual properties, was achieved with a 127 MB JPG with the unused parts cut off.
 
-source images:
-count: 222
-res: 5472x3648
-total pixels: 4 431 532 032
-date: 2017.09.19
-time: around 10 AM
-camera: senseFly S.O.D.A
-
-example
-latitude: 55 deg 34' 0.35" N
-longitude: 10 deg 9' 2.18" E
-altitude: 136.2 m Above Sea Level
-
-full ortho:
-res: 30350x19255
-total pixels: 584 389 250
-
-pixel ratio 7.6 times more pixels in original
-
-cropeed ortho:
-res: 29986x5669
-
-IN THIS SECTION SHOULD BE INCLUDED:
-\begin{itemize}
-\item Bundle adjustment - check ✅✔
-\item Digitial elevation model - check
-\item Orthorectification and orthomosaic creation - check
-\item EXIF data
-\item Number of images and approximate overlap
-\item Size of orthomosaic (resolution and disk size)
-\item Description of handling outside the fence data (cropping of the image)
-\item Screen shots of DSM and orthomosaic
-\end{itemize}
-
-\subsection{EXIF data}
-The images was taken 19\textsuperscript{th} of september 2017 from 10:01 AM to 10:41 AM. The footage was taken at Gyldensteen Gods at Gyldensteensvej 101, 5400 Bogense in an area contained by these four coordinates.
-\begin{itemize}
-\item[-] 55°33'59.99"N, 10°08'59.72"E \vspace{-7pt}
-\item[-] 55°34'10.37"N, 10°08'59.72"E \vspace{-7pt}
-\item[-] 55°34'10.37"N, 10°09'33.60"E \vspace{-7pt}
-\item[-] 55°33'59.99"N, 10°09'33.60"E
-\end{itemize}
-
-The camera used was a senseFly S.O.D.A. with an image resolution of 5472 z 3648 pixels and a focal length of 10.2 mm/28 mm (35 mm equivalent). The type of UAV was not specified by the EXIF informations but it was either a senseFly eBee X or eBee Classic.\\
-
-The images was taken on exposure priority with an exposure time of 1/1000 s and wide aperture of 2.8. The ISO-setting fluctuated from 200 to 800. The camera was set to auto white balance.
-
-%Pitch                           : 6.029021
-%Roll                            : -7.621159
-%Yaw                             : 316.127563
-
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=0.75\textwidth]{../Figures/Flight_path}
-	\caption{Illustration of the image path}
-	\label{fig:flight_path}
-\end{figure}
-In figure \ref{fig:flight_path} the positions of the images taken can be seen. This is not the flight path of the drone, but the positions where the images where taken.
-
+The 222 pieces of 5472x3648 images add up to a total of 4 431 532 032 pixels, while the resultant uncropped orthomosaic has a resolution of only 30350x19255, meaning 584 389 250 number of pixels.
+The source images contain about 7.6 times more pixels, suggesting that there is significant overlap.
+This is easily confirmed by looking at images in the order they were taken, a point we choose at one end takes three to four images to get to the other end, and this is only one axis.
+The cropped image has a resolution of 29986x5669, which is significantly smaller than the complete version.
 
 \end{document}

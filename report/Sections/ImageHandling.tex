@@ -3,6 +3,7 @@
 \section{Large Image Handling}\label{sec:imageHandling}
 For handling the orthmosaic, a handling procedure for large images must be designed. This was done as a generic Python module. All code mentioned in this section can be found in the file \url{src/image_divisor.py}.
 
+\vspace{-5pt}
 \subsection{The \textit{ImageDivisor} Class}
 A class is implemented to handle the image division into tiles. The constructor takes an image filename as well as values for the desired tile width and height. The division into tiles is then computed. The class then exposes accesibility methods for the tiles.
 
@@ -66,6 +67,7 @@ Note that if the index yields the last tile in the x direction of the image, the
 
 \end{verbatim}
 \end{enumerate}
+\vspace{-10pt}
 \item A function \textit{length()} to return the total number of tiles.
 \end{itemize}
 For implementing the Python iterator, three methods were overloaded:
@@ -75,7 +77,8 @@ For implementing the Python iterator, three methods were overloaded:
 \item The method \textit{\_\_next\_\_()} that gets called for each iteration to receive the respective iteration object
 \end{itemize}
 At this point, two approaches were considered for obtainment and storage of the image and tiles. The obtainment of tiles happens in the \textit{\_\_getitem\_\_(index)} method.\\
-The first approach was to load the entire orthomosaic using OpenCV's \textit{imread(...)} method during construction of the ImageDivisor object and from \textit{\_\_getitem\_\_(index)} return the \textit{numpy} slices of the image as given by the \textit{index\_to\_slice(index)} method explained above. The second approach was to use the slices obtained from \textit{index\_to\_slice(index)} for loading only the respective part of the orthomosaic using \textit{rasterior}. Both methods were implemented.\\
+The first approach was to load the entire orthomosaic using OpenCV's \textit{imread(...)} method during construction of the ImageDivisor object and from \textit{\_\_getitem\_\_(index)} return the \textit{numpy} slices of the image as given by the \textit{index\_to\_slice(index)} method explained above.\\
+The second approach was to use the slices obtained from \textit{index\_to\_slice(index)} for loading only the respective part of the orthomosaic using \textit{rasterior}. Both methods were implemented.\\
 The first approach executed faster than the second approach at the cost of memory, as for the first approach, the entire orthomosaic is stored in RAM whereas for the second approach, only one tile is stored in RAM at a time. As mentioned in section \ref{sec:photo}, the orthomosaic used for this purpose has been cropped and is thus not severely large, however for a general use case the orthomosaic could potentially be much larger. It was therefore decided to use the second approach and thus only having one tile stored in RAM at a time.\\
 The implementation of \textit{\_\_next\_\_()} checks if the variable \textit{iter\_index} is below the total number of tiles, then increments and returns the appropriate tile:
 \begin{verbatim}

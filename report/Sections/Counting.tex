@@ -44,7 +44,7 @@ The counting of pumpkins in one tile utilizes as mentioned the \textit{PumpkinCo
 This is done in the \textit{\_count\_pumpkins\_tile(...)} method. The resulting dictionary is returned.
 
 \subsubsection{Sorting the Counted Pumpkins}
-With the list of dictionaries contained the counted pumpkins data for each tile as explained above, the potentially overlapping counted pumpkins should be sorted. This is done in the method \textit{\_sort\_counted\_pumpkins\_data(...)}. The algorithm is explained below. The list of the mentioned dictionaries are contained in the variable \textit{counted\_pumpkins\_data}:
+With the list of dictionaries contained the counted pumpkins data for each tile as explained above, the potentially overlapping counted pumpkins should be sorted. This is done in the method \textit{\_sort\_counted\_pumpkins\_data(...)}. The algorithm is explained below. The list of the mentioned dictionaries are contained in the variable \linebreak \textit{counted\_pumpkins\_data}:
 \begin{enumerate}
 \item The method definition is as follows:
 \begin{verbatim}
@@ -76,7 +76,8 @@ The method \textit{\_is\_bordering(...)} simply determines if the tiles are bord
 \item If the tiles are bordering, reduce the number of counted pumpkins in the two dictionaries:
 \begin{verbatim}
     if is_bordering:
-        counted_pumpkins_data[i], counted_pumpkins_data[j] = self._reduce_counted_pumpkins(
+        counted_pumpkins_data[i], counted_pumpkins_data[j] = 
+         self._reduce_counted_pumpkins(
             counted_pumpkins_data[i],
             counted_pumpkins_data[j],
             direction,
@@ -119,8 +120,8 @@ for i, coord_i in enumerate(cnt_pmk_data_i['bordering_coordinates']):
 \begin{enumerate}
 \item Instantiate variable \textit{index\_to\_remove} and loop through tile \textit{j} bordering coordinates:
 \begin{verbatim}
-    index_to_remove = None              # None for no duplicate, -1 for removing from list i, 
-                                        # otherwise remove index from list j
+    index_to_remove = None    # None for no duplicate, -1 for removing from list i, 
+                              # otherwise remove index from list j
     for j, coord_j in enumerate(
         bordering_coords_j,
         i + 1
@@ -179,11 +180,13 @@ Note here, that a positive value for \textit{index\_to\_remove} will indicate re
 \end{enumerate}
 \item Finally, the dictionary for each tile is updated with the resulting pumpkin count:
 \begin{verbatim}
-    cnt_pmk_data_i['count'] = cnt_pmk_data_i['count'] - (len(cnt_pmk_data_i['bordering_coordinates']) - len(bordering_coords_i))
+    cnt_pmk_data_i['count'] = cnt_pmk_data_i['count'] -
+     (len(cnt_pmk_data_i['bordering_coordinates']) - len(bordering_coords_i))
 
     cnt_pmk_data_i['bordering_coordinates'] = bordering_coords_i;
 
-    cnt_pmk_data_j['count'] = cnt_pmk_data_j['count'] - (len(cnt_pmk_data_j['bordering_coordinates']) - len(bordering_coords_j))
+    cnt_pmk_data_j['count'] = cnt_pmk_data_j['count'] -
+     (len(cnt_pmk_data_j['bordering_coordinates']) - len(bordering_coords_j))
 
     cnt_pmk_data_j['bordering_coordinates'] = bordering_coords_j
 
