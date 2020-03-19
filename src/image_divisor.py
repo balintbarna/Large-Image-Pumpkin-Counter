@@ -12,6 +12,7 @@
 
 import cv2
 import numpy as np
+from copy import deepcopy
 
 inf = float('inf')
 
@@ -125,7 +126,23 @@ class ImageDivisor:
         #print(x_start, x_end, y_start, y_end)
         #input()
 
-        return np.transpose(self.img.read(window=((x_start, x_end), (y_start, y_end))))
+        tile = self.img.read(window=((x_start, x_end), (y_start, y_end)))
+        bgr = deepcopy(tile)
+        tile[0,:,:] = bgr[2,:,:]
+        tile[2,:,:] = bgr[0,:,:]
+
+        tile = np.swapaxes(
+                tile,
+                0,
+                2
+        )
+        tile = np.swapaxes(
+                tile,
+                0,
+                1
+        )
+
+        return tile
         #return self.img[x_start:x_end, y_start:y_end, :]
 
     def __iter__(self):
